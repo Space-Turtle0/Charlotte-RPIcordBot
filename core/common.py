@@ -358,10 +358,3 @@ class Emoji:
     loadingGIF2 = "<a:Loading:905563298089541673>"
     gsuite_logo = "<:gsuitelogo:932034284724834384>"
     turtle_smirk = "<:TurtleSmirk:879119619737124914>"
-
-    # SS Emojis
-    schoolsimplified = "<:SchoolSimplified:830689765329993807>"
-    ss_arrow = "<:SS:865715703545069568>"
-    human_resources = "<:SS_HumanResources:907766589972181043>"
-    timmyBook = "<:timmy_book:933043045493010453>"
-    timmyTutoring = "<:tutoring:933043045950164992>"

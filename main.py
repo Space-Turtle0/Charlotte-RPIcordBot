@@ -1,16 +1,13 @@
 """
-Copyright (C) SpaceTurtle0 - All Rights Reserved
+Copyright (C) TriageSpace - All Rights Reserved
  * Permission is granted to use this application as a boilerplate.
- * Written by Space. December 2022
+ * Written by Rohit. December 2022
 """
 
-__author__ = "SpaceTurtle0"
-__author_email__ = "__author__@__author__.com"
-__project__ = "PROJECT_NAME"
+__author__ = "TriageSpace/Rohit"
+__project__ = "Charlotte/RPIcordBot"
 
-import asyncio
 import faulthandler
-import io
 import logging
 import os
 import time
@@ -20,8 +17,6 @@ from urllib.parse import urlencode, quote
 import aiohttp
 import aiohttp.payload as payload
 import discord
-import matplotlib.pyplot as plt
-import multidict
 from alive_progress import alive_bar
 from discord import app_commands
 from discord.ext import commands
@@ -43,7 +38,7 @@ from core.special_methods import (
     before_invoke_,
     initialize_database,
     main_mode_check_,
-    #on_command_error_,
+    # on_command_error_,
     on_ready_,
     on_command_,
 )
@@ -89,7 +84,7 @@ class CustomFormData(aiohttp.FormData):
             content_type=content_type)
 
 
-class BOTNAMECommandTree(app_commands.CommandTree):
+class CharlotteCommandTree(app_commands.CommandTree):
     def __init__(self, bot):
         super().__init__(bot)
         self.bot = bot
@@ -110,7 +105,7 @@ class BOTNAMECommandTree(app_commands.CommandTree):
         pass"""
 
 
-class BOTNAME(commands.Bot):
+class Charlotte(commands.Bot):
     """
     Generates a StudyBot Instance.
     """
@@ -120,7 +115,7 @@ class BOTNAME(commands.Bot):
             command_prefix=commands.when_mentioned_or(os.getenv("PREFIX")),
             intents=discord.Intents.all(),
             case_insensitive=True,
-            tree_cls=BOTNAMECommandTree,
+            tree_cls=CharlotteCommandTree,
             activity=discord.Activity(
                 type=discord.ActivityType.watching, name="/help | url"
             ),
@@ -216,13 +211,6 @@ class BOTNAME(commands.Bot):
         return __author__
 
     @property
-    def author_email(self):
-        """
-        Returns the author email of the bot.
-        """
-        return __author_email__
-
-    @property
     def start_time(self):
         """
         Returns the time the bot was started.
@@ -230,13 +218,14 @@ class BOTNAME(commands.Bot):
         return self._start_time
 
 
-bot = BOTNAME(time.time())
+bot = Charlotte(time.time())
 
 client = OpenAI(
     # This is the default and can be omitted
-    api_key='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',
+    api_key=os.getenv("OPENAPI_KEY"),
 )
-# Creating a slash command in discord.py
+
+
 @bot.tree.command(name="ask", description="Ask a question", guild=discord.Object(id=1216429016760717322))
 async def ask(interaction: discord.Interaction, *, question: str, be_nice: bool = False):
     """if interaction.channel_id != 1216431006031282286:
@@ -275,75 +264,6 @@ async def say(interaction: discord.Interaction, message: str):
     await interaction.channel.send(message)
 
 
-@bot.command(aliases=["lat"])
-async def latex(ctx: commands.Context, *, formula: str):
-    async with aiohttp.ClientSession() as session:
-        async with ctx.typing():
-            embed = discord.Embed()
-            embed.set_author(name=ctx.message.author.display_name,
-                             icon_url=str(ctx.message.author.avatar.url))
-            form_data = CustomFormData()
-            form_data.add_field("formula", formula)
-            form_data.add_fields(multidict.MultiDict(default_data))
-            async with session.post("https://www.quicklatex.com/latex3.f", data=form_data) as response:
-                formula_data = (await response.text()).splitlines()
-                if int(formula_data[0]) != 0:
-                    await ctx.send("That isn't a valid latex expression")
-                    await ctx.send(f"`{formula_data[2]}`")
-                    return
-                image_url = formula_data[1].split()[0]
-                print("Sending", formula)
-                embed.set_image(url=image_url)
-                message: discord.Message = await ctx.send(embed=embed)
-        try:
-            before, after = await bot.wait_for("message_edit", check=lambda old, _: old.id == ctx.message.id, timeout=600)
-            await message.delete()
-            await bot.process_commands(after)
-        except asyncio.TimeoutError:
-            pass
-
-
-@bot.tree.command(name="latex_slash", description="Render a LaTeX equation.", guild=discord.Object(id=1216429016760717322))
-async def latex_slash(interaction: discord.Interaction, *, equation: str):
-    """Render LaTeX equation as an image with transparent background and send it."""
-    await interaction.response.defer(thinking=True)
-    try:
-        # Generate the image
-        buf = io.BytesIO()
-        plt.figure(figsize=(6, 1))  # Adjust the figure size as needed
-        plt.text(0.5, 0.5, f'${equation}$', fontsize=15, ha='center', va='center', color='white')
-        plt.axis('off')
-        plt.gca().set_facecolor('none')
-        plt.gca().set_axis_off()
-        plt.subplots_adjust(top=1, bottom=0, right=1, left=0,
-                            hspace=0, wspace=0)
-        plt.margins(0, 0)
-        plt.gca().xaxis.set_major_locator(plt.NullLocator())
-        plt.gca().yaxis.set_major_locator(plt.NullLocator())
-        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0, transparent=True)
-        plt.close()
-        buf.seek(0)
-
-        # Send the image
-        file = discord.File(buf, filename="equation.png")
-        await interaction.followup.send(file=file)
-    except Exception as e:
-        # If rendering fails, notify the user
-        await interaction.followup.send("Failed to render the LaTeX equation. Please check your syntax.", ephemeral=True)
-        print(e)
-
-"""@bot.event
-async def on_interaction(interaction: discord.Interaction):
-    if interaction.type == discord.InteractionType.application_command:
-        database.CommandAnalytics.create(
-            command=interaction.command.name,
-            guild_id=interaction.guild.id,
-            user=interaction.user.id,
-            date=datetime.now(),
-            command_type="slash",
-        ).save()"""
-
-
 if os.getenv("DSN_SENTRY") is not None:
     sentry_logging = LoggingIntegration(
         level=logging.INFO,  # Capture info and above as breadcrumbs
@@ -358,6 +278,7 @@ if os.getenv("DSN_SENTRY") is not None:
         integrations=[FlaskIntegration(), sentry_logging],
     )
 
+
 @bot.command()
 async def sayvc(ctx: commands.Context, *, text=None):
     query = database.Administrators.select().where(database.Administrators.discordID == ctx.author.id)
@@ -365,29 +286,22 @@ async def sayvc(ctx: commands.Context, *, text=None):
         await ctx.message.delete()
 
         if not text:
-            # We have nothing to speak
             await ctx.send(f"Hey {ctx.author.mention}, I need to know what to say please.")
             return
 
-        vc = ctx.voice_client  # We use it more then once, so make it an easy variable
+        vc = ctx.voice_client
         if not vc:
-            # We are not currently in a voice channel
             await ctx.send("I need to be in a voice channel to do this, please use the connect command.")
             return
 
-        # Lets prepare our text, and then save the audio file
         tts = gTTS(text=text, lang="en")
         tts.save("text.mp3")
 
         try:
-            # Lets play that mp3 file in the voice channel
             vc.play(discord.FFmpegOpusAudio('text.mp3'), after=lambda e: print(f"Finished playing: {e}"))
-
-            # Lets set the volume to 1
             vc.source = discord.PCMVolumeTransformer(vc.source)
             vc.source.volume = 1
 
-        # Handle the exceptions that can occur
         except Exception as e:
             print(e)
     else:

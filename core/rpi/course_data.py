@@ -1,4 +1,5 @@
 import requests
+
 from core.rpi.quacs_base import Course, Prerequisite, CourseCatalog, Section, Restriction
 
 

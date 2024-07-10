@@ -1,8 +1,6 @@
-import traceback
 import discord
 from discord.ext import commands
-from discord.ui import View, Select, Modal, TextInput
-from core import database  # Make sure database.py is in the same directory or update the import path accordingly
+from discord.ui import View, Select
 
 # Define dorm and class year roles with emojis and descriptions
 DORM_ROLES = {

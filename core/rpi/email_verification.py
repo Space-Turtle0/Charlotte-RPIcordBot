@@ -1,17 +1,15 @@
+import base64
+import os
+import pickle
+import random
 import time
 from email.mime.text import MIMEText
 
 import discord
-from discord.ext import commands
 from discord.ui import Modal, TextInput, View, Button
-import os
-import pickle
-import base64
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-import random
 
 from core import database
 

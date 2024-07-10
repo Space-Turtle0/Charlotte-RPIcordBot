@@ -2,7 +2,6 @@ import subprocess
 import sys
 from pathlib import Path
 from threading import Thread
-from typing import Literal
 
 import discord
 from discord import app_commands
@@ -11,7 +10,6 @@ from dotenv import load_dotenv
 
 from core import database
 from core.checks import (
-    slash_is_bot_admin_2,
     slash_is_bot_admin_4,
     slash_is_bot_admin,
 )

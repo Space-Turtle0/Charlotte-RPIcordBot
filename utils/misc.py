@@ -3,11 +3,10 @@ import datetime
 import os
 import time
 from datetime import timedelta
-from typing import List, Literal, TYPE_CHECKING
-import requests
-import openai
+from typing import List, TYPE_CHECKING
 
 import discord
+import openai
 import psutil
 from discord import app_commands, ui, FFmpegPCMAudio
 from discord.ext import commands
@@ -15,7 +14,6 @@ from dotenv import load_dotenv
 from gtts import gTTS
 
 from core import database
-from core.checks import slash_is_bot_admin
 from core.common import (
     Emoji,
     Colors,

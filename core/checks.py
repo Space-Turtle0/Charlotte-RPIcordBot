@@ -6,9 +6,6 @@ If you wish to use the @is_botAdmin check, DM Space.
 Otherwise, use the same format to make your own check.
 """
 
-import os
-import re
-
 import discord
 from discord import app_commands
 from discord.ext import commands

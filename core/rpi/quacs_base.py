@@ -1,6 +1,3 @@
-import requests
-import json
-
 class TimeSlot:
     def __init__(self, dateEnd, dateStart, days, instructor, location, timeEnd, timeStart):
         self.date_end = dateEnd

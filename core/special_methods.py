@@ -3,10 +3,7 @@ from __future__ import annotations
 import collections
 import os
 import subprocess
-import traceback
 from datetime import datetime
-from difflib import get_close_matches
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -16,7 +13,6 @@ from discord.ext import commands
 from core import database
 from core.common import (
     ConsoleColors,
-    Colors,
 )
 from core.logging_module import get_log
 

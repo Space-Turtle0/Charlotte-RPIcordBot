@@ -2,13 +2,9 @@
 import traceback
 
 import discord
-from discord.ext import commands
-from discord.ui import View, Modal, TextInput, Button
-import random
-from core import database  # Make sure database.py is in the same directory or update the import path accordingly
+from discord.ui import View, Modal, TextInput
 
-insults = ["Dingus", "Buffoon", "Clown", "Muppet", "Nincompoop"]
-
+from core import database
 
 class RoleColorModal(Modal):
     hex_code = TextInput(label="Hex Code", placeholder="Enter a hex code (e.g., #123abc)", max_length=7)

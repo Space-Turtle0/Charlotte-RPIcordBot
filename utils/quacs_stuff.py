@@ -3,17 +3,15 @@ import traceback
 from datetime import datetime
 from typing import Literal
 
-import requests
 import discord
-from discord.ext import commands
+import requests
 from discord import app_commands
-import json
-
+from discord.ext import commands
 from pytz import timezone
 
 from core import database
 from core.rpi.course_data import CourseData
-from core.rpi.quacs_base import Course, Prerequisite, Restriction
+from core.rpi.quacs_base import Prerequisite, Restriction
 
 # URLs to fetch the JSON files from GitHub
 GITHUB_BASE_URL = 'https://raw.githubusercontent.com/quacs/quacs-data/master/semester_data/202409/'
