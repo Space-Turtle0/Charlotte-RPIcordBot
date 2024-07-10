@@ -137,3 +137,7 @@ data.db
 sendgridtesting.py
 stuff.py
 token.pickle
+/.env
+/error.txt
+/output.mp3
+/text.mp3
