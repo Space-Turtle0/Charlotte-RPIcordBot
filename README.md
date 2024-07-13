@@ -49,4 +49,3 @@ Start the bot by running:
 ```
 python main.py
 ```
-"""
