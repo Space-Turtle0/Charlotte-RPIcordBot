@@ -1,6 +1,5 @@
 # Charlotte-RPIcordBot
 
-"""
 Charlotte-RPIcordBot is a simple, multipurpose Discord bot designed to better the experience of users in the (RPI)cord '28 community.
 
 ## Features
