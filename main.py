@@ -201,5 +201,4 @@ if os.getenv("DSN_SENTRY") is not None:
     )
 
 if __name__ == "__main__":
-    division_by_zero = 1 / 0
     bot.run(os.getenv("TOKEN"))
