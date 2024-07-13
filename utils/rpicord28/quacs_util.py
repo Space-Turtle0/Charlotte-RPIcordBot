@@ -124,7 +124,7 @@ class RegistrationCog(commands.Cog):
         await interaction.response.defer(thinking=True)
         course_data = self.course_data.get_course(course_key, course_num)
         if course_data == None:
-            await interaction.followup.send("No Course Found")
+            return await interaction.followup.send("No Course Found")
         catalog_data = self.course_data.get_course_catalog(course_key, course_num)
 
         if section_num:
