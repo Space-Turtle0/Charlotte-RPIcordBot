@@ -56,10 +56,15 @@ class DormRoleView(View):
 class DormDropdown(Select):
     def __init__(self, placeholder, options):
         super().__init__(placeholder=placeholder, min_values=1, max_values=1, options=options, custom_id="dorm_dropdown")
+        self.upperclassman_role = 1161340460242063557
+        self.co28_role = 1161340010822385694
 
     async def callback(self, interaction: discord.Interaction):
-        selected_role_id = int(self.values[0])
-        await update_role(interaction, selected_role_id, 'dorm')
+        if any(role.id in [self.co28_role, self.upperclassman_role] for role in interaction.user.roles):
+            selected_role_id = int(self.values[0])
+            await update_role(interaction, selected_role_id, 'dorm')
+        else:
+            await interaction.response.send_message("You must verify your email before selecting a dorm role.", ephemeral=True)
 
 class ClassYearRoleView(View):
     def __init__(self):

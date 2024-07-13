@@ -73,6 +73,17 @@ class EmailVerificationModal(Modal):
             await interaction.response.send_message("Please use a valid @rpi.edu email address.", ephemeral=True)
             return
 
+        check = database.FinalizedEmailVerification.select().where(database.FinalizedEmailVerification.email == rpi_email)
+        if check.exists():
+            for record in check:
+                print("e:" + str(record.discord_id) + ":" + str(interaction.user.id))
+                if record.discord_id != interaction.user.id:
+                    await interaction.response.send_message(
+                        "This email has already been used for verification. Please use a different email.",
+                        ephemeral=True)
+                    return
+        #return await interaction.response.send_message("Please wait while we send a verification email to your RPI email...", ephemeral=True)
+
         if not self.class_year.value.isdigit() or len(self.class_year.value) != 4 or int(self.class_year.value) < 2022 or int(self.class_year.value) > 2030:
             await interaction.response.send_message("Invalid class year. Please use the format 20XX.", ephemeral=True)
             return
@@ -89,7 +100,7 @@ class EmailVerificationModal(Modal):
         service = get_gmail_service()
         message = create_message(rpi_email, f' RPIcord Verification Code: {verification_code}', f'Use the code {verification_code} to verify your email address for the RPI Class of 2028 Discord Server.\n\nIf you did not request this, please ignore this email.')
         send_message(service, 'me', message)
-        await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n>**Use /verification verify_code to finalize verification!**', ephemeral=True)
+        await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n> **Use /verification verify_code to finalize verification!**', ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong. Contact the bot admin (<@409152798609899530>) if this keeps happening.', ephemeral=True)

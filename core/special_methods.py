@@ -1,10 +1,21 @@
+"""
+This module provides special methods for a Discord bot, including command analytics, bot readiness, command handling, 
+and database initialization.
+
+Functions:
+    before_invoke_(ctx: commands.Context): Logs command usage and sets user context in Sentry.
+    on_ready_(bot): Executes tasks when the bot is ready, including database checks and logging.
+    on_command_(bot, ctx: commands.Context): Handles command usage, enforcing slash commands if necessary.
+    main_mode_check_(ctx: commands.Context) -> bool: Checks various conditions to determine if a command can be executed.
+    initialize_database(bot): Initializes the database and creates necessary table data if they don't exist.
+"""
+
 from __future__ import annotations
 
 import collections
 import os
 import subprocess
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import discord
 import sentry_sdk
@@ -15,10 +26,6 @@ from core.common import (
     ConsoleColors,
 )
 from core.logging_module import get_log
-
-if TYPE_CHECKING:
-    # change this if you change the class name
-    from main import BOTNAME as BotObject
 
 _log = get_log(__name__)
 
@@ -63,7 +70,7 @@ async def before_invoke_(ctx: commands.Context):
         )
 
 
-async def on_ready_(bot: BotObject):
+async def on_ready_(bot):
     
     now = datetime.now()
     query: database.CheckInformation = (
@@ -127,7 +134,7 @@ async def on_ready_(bot: BotObject):
 
 
 
-async def on_command_(bot: BotObject, ctx: commands.Context):
+async def on_command_(bot, ctx: commands.Context):
     return
     # if you want to enforce slash commands only, uncomment the return statement above
     if ctx.command.name in ["sync", "ping", "kill", "jsk", "py"]:
@@ -139,10 +146,6 @@ async def on_command_(bot: BotObject, ctx: commands.Context):
 
 
 async def main_mode_check_(ctx: commands.Context) -> bool:
-    """MT = discord.utils.get(ctx.guild.roles, name="Moderator")
-    VP = discord.utils.get(ctx.guild.roles, name="VP")
-    CO = discord.utils.get(ctx.guild.roles, name="CO")
-    SS = discord.utils.get(ctx.guild.roles, name="Secret Service")"""
     CI_query: database.CheckInformation = database.CheckInformation.select().where(database.CheckInformation.id == 1).get()
 
     blacklisted_users = []
@@ -217,6 +220,5 @@ def initialize_database(bot):
     query.persistent_change = False
     query.save()
     database.db.close()
-
 
 

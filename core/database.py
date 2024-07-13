@@ -289,6 +289,29 @@ class EmailVerification(BaseModel):
     verification_code = TextField()
     class_year = TextField()
 
+class FinalizedEmailVerification(BaseModel):
+    """
+    # FinalizedEmailVerification:
+    Finalized Email Verification for users.
+
+    `id`: AutoField()
+    Database Entry
+
+    `discord_id`: BigIntegerField()
+    Discord ID
+
+    `email`: TextField()
+    Email Address
+
+    `class_year`: TextField()
+    Class Year
+
+    """
+    id = AutoField()
+    discord_id = BigIntegerField()
+    email = TextField()
+    class_year = TextField()
+
 # Function to initialize the database
 def initialize_db():
     db.connect()
@@ -343,6 +366,7 @@ tables = {
     "ColorUser": ColorUser,
     "ClassSchedule": ClassSchedule,
     "EmailVerification": EmailVerification,
+    "FinalizedEmailVerification": FinalizedEmailVerification
 }
 
 """

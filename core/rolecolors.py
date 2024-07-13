@@ -1,10 +1,21 @@
-# role_management.py
+"""
+This module provides functionality for customizing Discord role colors and names through interactive modals.
+
+Classes:
+    RoleColorModal: A modal for users to input a hex code to change their role color.
+    RoleNameModal: A modal for users to input a new name for their role.
+    CustomizeView: A persistent view with buttons to trigger the role customization modals and manage a specific role.
+
+Only avaliable in the Guild: r(evolution)pi
+"""
+
 import traceback
 
 import discord
 from discord.ui import View, Modal, TextInput
 
 from core import database
+
 
 class RoleColorModal(Modal):
     hex_code = TextInput(label="Hex Code", placeholder="Enter a hex code (e.g., #123abc)", max_length=7)
@@ -106,4 +117,3 @@ class CustomizeView(View):
         else:
             await interaction.user.add_roles(roblox_role, reason="User requested to add Roblox role")
             await interaction.response.send_message("Roblox role added!", ephemeral=True)
-

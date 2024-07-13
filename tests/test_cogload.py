@@ -1,4 +1,6 @@
+import glob
 import sys
+import os
 
 import discord
 import discord.ext.test as dpytest
@@ -6,19 +8,20 @@ import pytest
 from discord.ext import commands
 from pathlib import Path
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 def get_extensions():
     extensions = ["jishaku"]
-    if sys.platform == "win32" or sys.platform == "cygwin":
-        dirpath = "\\"
-    else:
-        dirpath = "/"
+    utils_path = Path(__file__).parent.parent / 'utils'
 
-    for file in Path("utils").glob("**/*.py"):
-
-        if any(dev_symbol in file.name for dev_symbol in ["!", "DEV", "view_models"]):
+    for file in utils_path.glob("**/*.py"):
+        # Skip files that contain certain symbols or keywords
+        if any(dev_symbol in file.name for dev_symbol in ["!", "DEV"]):
             continue
-        extensions.append(str(file).replace(dirpath, ".").replace(".py", ""))
+        # Construct the module path
+        module_path = file.relative_to(utils_path.parent).with_suffix('').as_posix().replace('/', '.')
+        extensions.append(module_path)
     return extensions
 
 
@@ -36,14 +39,3 @@ def bot(event_loop):
 async def test_cogs(bot):
     for ext in get_extensions():
         await bot.load_extension(ext)
-
-
-def pytest_sessionfinish():
-    print("Session finished")
-
-
-
-
-
-
-
