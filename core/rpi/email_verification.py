@@ -16,9 +16,6 @@ from core import database
 # If modifying these SCOPES, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-# Discord bot token
-DISCORD_BOT_TOKEN = 'YOUR_DISCORD_BOT_TOKEN'
-
 # Gmail API setup
 def get_gmail_service():
     creds = None

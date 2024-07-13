@@ -16,8 +16,11 @@ import discord
 from alive_progress import alive_bar
 from discord import app_commands
 from discord.ext import commands
+from discord_sentry_reporting import use_sentry
 from dotenv import load_dotenv
 from pygit2 import Repository, GIT_DESCRIBE_TAGS
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from core import database
 from core.common import get_extensions
@@ -182,8 +185,21 @@ class Charlotte(commands.Bot):
 
 
 bot = Charlotte(time.time())
-
 initialize_database(bot)
 
+if os.getenv("DSN_SENTRY") is not None:
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR,  # Send errors as events
+    )
+
+    use_sentry(
+        bot,  # Traceback tracking, DO NOT MODIFY THIS
+        dsn=os.getenv("DSN_SENTRY"),
+        traces_sample_rate=1.0,
+        integrations=[FlaskIntegration(), sentry_logging],
+    )
+
 if __name__ == "__main__":
+    division_by_zero = 1 / 0
     bot.run(os.getenv("TOKEN"))
