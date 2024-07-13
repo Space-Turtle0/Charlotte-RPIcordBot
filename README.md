@@ -1,7 +1,7 @@
 # Charlotte-RPIcordBot
 
 """
-Charlotte-RPIcordBot is a Discord bot designed to enhance the experience of users in the Rensselaer Polytechnic Institute (RPI) community. It offers various features such as role customization, command analytics, and email verification.
+Charlotte-RPIcordBot is a simple, multipurpose Discord bot designed to better the experience of users in the (RPI)cord '28 community.
 
 ## Features
 
@@ -24,7 +24,7 @@ Charlotte-RPIcordBot is a Discord bot designed to enhance the experience of user
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/Charlotte-RPIcordBot.git
+    git clone https://github.com/TriageSpace/Charlotte-RPIcordBot.git
     cd Charlotte-RPIcordBot
     ```
 
