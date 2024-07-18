@@ -4,7 +4,7 @@ This module provides functionality for customizing Discord role colors and names
 Classes:
     RoleColorModal: A modal for users to input a hex code to change their role color.
     RoleNameModal: A modal for users to input a new name for their role.
-    CustomizeView: A persistent view with buttons to trigger the role customization modals and manage a specific role.
+    CustomizeView: A persistent view with a dropdown to trigger the role customization modals and manage a specific role.
 
 Only avaliable in the Guild: r(evolution)pi
 """
@@ -12,7 +12,7 @@ Only avaliable in the Guild: r(evolution)pi
 import traceback
 
 import discord
-from discord.ui import View, Modal, TextInput
+from discord.ui import View, Modal, TextInput, Select, SelectOption
 
 from core import database
 
@@ -28,6 +28,7 @@ class RoleColorModal(Modal):
             return
 
         user_record = database.ColorUser.select().where(database.ColorUser.user_id == interaction.user.id)
+        reference_role = interaction.guild.get_role(1216596310619328642)
 
         if user_record.exists():
             role = interaction.guild.get_role(user_record.get().role_id)
@@ -36,18 +37,18 @@ class RoleColorModal(Modal):
                 await interaction.response.send_message(f"Role {role.name} edited.", ephemeral=True)
             else:
                 role_name = interaction.user.name + f"'s Role ({hex_code})"
-                role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}")
+                role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}", position=reference_role.position + 1)
                 database.update_user_role(interaction.user.id, role.id)
                 await interaction.response.send_message(f"Role {role.name} assigned.", ephemeral=True)
         else:
             role_name = interaction.user.name + f"'s Role ({hex_code})"
-            role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}")
+            role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}", position=reference_role.position + 1)
             query = database.ColorUser.create(user_id=interaction.user.id, role_id=role.id)
             query.save()
             database.update_user_role(interaction.user.id, role.id)
+            await interaction.user.add_roles(role, reason=f"{interaction.user.name} requested color change to {hex_code}")
             await interaction.response.send_message(f"Role {role.name} given!", ephemeral=True)
 
-        await interaction.user.add_roles(role, reason=f"{interaction.user.name} requested color change to {hex_code}")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong. Contact rohit if this keeps happening :(.', ephemeral=True)
@@ -63,6 +64,7 @@ class RoleNameModal(Modal):
         role_name = self.role_name.value
 
         user_record = database.ColorUser.select().where(database.ColorUser.user_id == interaction.user.id)
+        reference_role = interaction.guild.get_role(1216596310619328642)
 
         if user_record.exists():
             role = interaction.guild.get_role(user_record.get().role_id)
@@ -72,20 +74,19 @@ class RoleNameModal(Modal):
             else:
                 random_hex_code = discord.Color.random()
                 role_name = interaction.user.name + f"'s Role ({random_hex_code.value})"
-                role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}")
+                role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}", position=reference_role.position + 1)
                 database.update_user_role(interaction.user.id, role.id)
                 await interaction.response.send_message(f"Role {role.name} assigned.", ephemeral=True)
         else:
             random_hex_code = discord.Color.random()
             role_name = interaction.user.name + f"'s Role ({random_hex_code.value})"
-            role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}")
-
+            role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}", position=reference_role.position + 1)
             query = database.ColorUser.create(user_id=interaction.user.id, role_id=role.id)
             query.save()
             database.update_user_role(interaction.user.id, role.id)
+            await interaction.user.add_roles(role, reason=f"{interaction.user.name} requested name change to {role_name}")
             await interaction.response.send_message(f"Role {role.name} given!", ephemeral=True)
 
-        await interaction.user.add_roles(role, reason=f"{interaction.user.name} requested name change to {role_name}")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong. Contact rohit if this keeps happening :(.', ephemeral=True)
@@ -97,23 +98,38 @@ class RoleNameModal(Modal):
 class CustomizeView(View):
     def __init__(self):
         super().__init__(timeout=None)  # Persistent view
+        options = [
+            SelectOption(label="Customize Role Color", value="customize_role_color", emoji="🎨"),
+            SelectOption(label="Customize Role Name", value="customize_role_name", emoji="📝"),
+            SelectOption(label="Get Roblox Role", value="get_roblox_role", emoji="🤖"),
+            SelectOption(label="Get Valorant Role", value="get_valorant_role", emoji="🔫")
+        ]
+        self.add_item(CustomizeDropdown(options=options))
 
-    @discord.ui.button(label="Customize Role Color", style=discord.ButtonStyle.primary, custom_id="customize_role_color")
-    async def customize_button_color(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modal = RoleColorModal(title="Customize Your Role Color")
-        await interaction.response.send_modal(modal)
+class CustomizeDropdown(Select):
+    def __init__(self, options):
+        super().__init__(placeholder="Choose an action...", min_values=1, max_values=1, options=options)
 
-    @discord.ui.button(label="Customize Role Name", style=discord.ButtonStyle.gray, custom_id="customize_role_name")
-    async def customize_button_name(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modal = RoleNameModal(title="Customize Your Role Name")
-        await interaction.response.send_modal(modal)
-
-    @discord.ui.button(label="Get Roblox Role", style=discord.ButtonStyle.danger, custom_id="get_roblox_role")
-    async def get_roblox_role(self, interaction: discord.Interaction, button: discord.ui.Button):
-        roblox_role = discord.utils.get(interaction.guild.roles, id=1239657271143698564)
-        if roblox_role in interaction.user.roles:
-            await interaction.user.remove_roles(roblox_role, reason="User requested to remove Roblox role")
-            await interaction.response.send_message("Roblox role removed!", ephemeral=True)
-        else:
-            await interaction.user.add_roles(roblox_role, reason="User requested to add Roblox role")
-            await interaction.response.send_message("Roblox role added!", ephemeral=True)
+    async def callback(self, interaction: discord.Interaction):
+        if self.values[0] == "customize_role_color":
+            modal = RoleColorModal(title="Customize Your Role Color")
+            await interaction.response.send_modal(modal)
+        elif self.values[0] == "customize_role_name":
+            modal = RoleNameModal(title="Customize Your Role Name")
+            await interaction.response.send_modal(modal)
+        elif self.values[0] == "get_roblox_role":
+            roblox_role = discord.utils.get(interaction.guild.roles, id=1239657271143698564)
+            if roblox_role in interaction.user.roles:
+                await interaction.user.remove_roles(roblox_role, reason="User requested to remove Roblox role")
+                await interaction.response.send_message("Roblox role removed!", ephemeral=True)
+            else:
+                await interaction.user.add_roles(roblox_role, reason="User requested to add Roblox role")
+                await interaction.response.send_message("Roblox role added!", ephemeral=True)
+        elif self.values[0] == "get_valorant_role":
+            valorant_role = discord.utils.get(interaction.guild.roles, id=1249529840034512946)
+            if valorant_role in interaction.user.roles:
+                await interaction.user.remove_roles(valorant_role, reason="User requested to remove Valorant role")
+                await interaction.response.send_message("Valorant role removed!", ephemeral=True)
+            else:
+                await interaction.user.add_roles(valorant_role, reason="User requested to add Valorant role")
+                await interaction.response.send_message("Valorant role added!", ephemeral=True)

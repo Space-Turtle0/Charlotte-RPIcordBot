@@ -312,6 +312,12 @@ class FinalizedEmailVerification(BaseModel):
     email = TextField()
     class_year = TextField()
 
+class StarboardMessage(BaseModel):
+    id = AutoField()
+    original_message_id = IntegerField(unique=True)
+    starboard_message_id = IntegerField()
+    star_count = IntegerField() 
+
 # Function to initialize the database
 def initialize_db():
     db.connect()
@@ -366,7 +372,8 @@ tables = {
     "ColorUser": ColorUser,
     "ClassSchedule": ClassSchedule,
     "EmailVerification": EmailVerification,
-    "FinalizedEmailVerification": FinalizedEmailVerification
+    "FinalizedEmailVerification": FinalizedEmailVerification,
+    "StarboardMessage": StarboardMessage
 }
 
 """

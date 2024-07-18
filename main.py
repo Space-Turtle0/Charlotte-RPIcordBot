@@ -128,6 +128,12 @@ class Charlotte(commands.Bot):
 
         await self.process_commands(message)
 
+    async def on_member_join(self, member: discord.Member):
+        if member.guild.id == 1216429016760717322 and not member.bot:
+            welcome_channel = await self.bot.fetch_channel(1216429018744885321)
+
+            await welcome_channel.send(f"hi loser, {member.mention}. im just here to tell you that if you want a custom role, go to <#1219037652414894310>. bye. also keira sucks lol")
+
     async def is_owner(self, user: discord.User):
         """
         Checks if the user is the owner of the bot.

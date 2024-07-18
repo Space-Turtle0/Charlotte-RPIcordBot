@@ -24,7 +24,10 @@ def get_gmail_service():
             creds = pickle.load(token)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except:
+                raise Exception("Error refreshing token") # Sentry needs to pick this up.
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
@@ -94,7 +97,11 @@ class EmailVerificationModal(Modal):
         q = database.EmailVerification.create(discord_id=interaction.user.id, email=rpi_email, verification_code=verification_code, class_year=self.class_year.value)
         q.save()
 
-        service = get_gmail_service()
+        try:
+            service = get_gmail_service()
+        except:
+            await interaction.response.send_message("Looks like the Gmail API is down. Please try again later. (Contact <@409152798609899530> if this keeps happening.)", ephemeral=True)
+            return
         message = create_message(rpi_email, f' RPIcord Verification Code: {verification_code}', f'Use the code {verification_code} to verify your email address for the RPI Class of 2028 Discord Server.\n\nIf you did not request this, please ignore this email.')
         send_message(service, 'me', message)
         await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n> **Use /verification verify_code to finalize verification!**', ephemeral=True)

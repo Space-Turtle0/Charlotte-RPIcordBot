@@ -67,6 +67,38 @@ class RegistrationCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.course_data = CourseData()
+        self.ap_credit_mapping = {
+            "Art and Design 2-D": {4: "ARTS-2220", 5: "ARTS-2220"},
+            "Art and Design 3-D": {4: "ARTS-2210", 5: "ARTS-2210"},
+            "Drawing": {4: "ARTS-1200", 5: "ARTS-1200"},
+            "Art History": {4: "ARTS-1050", 5: "ARTS-1050"},
+            "Chinese Language and Culture": {4: "LANG-2410", 5: "LANG-2410"},
+            "Microeconomics": {4: "ECON-1000", 5: "ECON-1000"},
+            "Macroeconomics": {4: "ECON-1000", 5: "ECON-1000"},
+            "Micro and Macroeconomics": {4: "ECON-1200", 5: "ECON-1200"},
+            "English Language and Composition": {4: "WRIT-1000", 5: "WRIT-1000"},
+            "English Literature and Composition": {4: "WRIT-1000", 5: "WRIT-1000"},
+            "Foreign Languages": {4: "LANG-1000", 5: "LANG-1000"},
+            "United States Government and Politics": {4: "STSO-1000", 5: "STSO-1000"},
+            "Comparative Government and Politics": {4: "STSO-1000", 5: "STSO-1000"},
+            "United States History": {4: "STSO-1000", 5: "STSO-1000"},
+            "European History": {4: "STSO-1000", 5: "STSO-1000"},
+            "World History": {4: "STSO-1000", 5: "STSO-1000"},
+            "Human Geography": {4: "STSO-1000", 5: "STSO-1000"},
+            "Music Theory": {4: "ARTS-1380", 5: "ARTS-1380"},
+            "Psychology": {4: "PSYC-1200", 5: "PSYC-1200"},
+            "Biology": {4: "BIOL-1010", 5: "BIOL-1010"},
+            "Chemistry": {4: "CHEM-1100", 5: "CHEM-1100"},
+            "Computer Science A": {4: "CSCI-1100", 5: "CSCI-1100"},
+            "Computer Science Principles": {4: "CSCI-1000", 5: "CSCI-1000"},
+            "Environmental Science": {4: "IENV-1000", 5: "IENV-1000"},
+            "Calculus AB": {4: "Calculus I", 5: "Calculus I"},
+            "Calculus BC": {4: "Calculus I and II", 5: "Calculus I and II"},
+            "Physics C: Mechanics": {4: "PHYS-1100", 5: "PHYS-1100"},
+            "Physics C: Electricity and Magnetism": {5: "PHYS-1200"},
+            "Physics 1: Algebra-Based": {4: "PHYS-1100", 5: "PHYS-1100"},
+            "Statistics": {4: "MGMT-2100", 5: "MGMT-2100"}
+        }
 
     QC = app_commands.Group(
         name="quacs",
@@ -403,6 +435,16 @@ class RegistrationCog(commands.Cog):
         embed.add_field(name="/compare", value="Compare your classes with a friend.\nUsage: /compare user=<user>",
                         inline=False)
         await interaction.response.send_message(embed=embed)
+
+    @QC.command(name='ap_credit', description='Get RPI course credit for an AP subject and score')
+    @app_commands.describe(subject='The AP subject', score='The score received')
+    async def ap_credit(self, interaction: discord.Interaction, subject: str, score: int):
+        subject = subject.strip()
+        if subject in self.ap_credit_mapping and score in self.ap_credit_mapping[subject]:
+            course = self.ap_credit_mapping[subject][score]
+            await interaction.response.send_message(f"With a score of {score} in {subject}, you receive credit for {course}.", ephemeral=True)
+        else:
+            await interaction.response.send_message("No matching course found for the given subject and score.", ephemeral=True)
 
 
 async def setup(bot):
