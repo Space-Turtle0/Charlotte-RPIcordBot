@@ -12,7 +12,8 @@ Only avaliable in the Guild: r(evolution)pi
 import traceback
 
 import discord
-from discord.ui import View, Modal, TextInput, Select, SelectOption
+from discord import SelectOption
+from discord.ui import View, Modal, TextInput, Select
 
 from core import database
 
@@ -37,12 +38,15 @@ class RoleColorModal(Modal):
                 await interaction.response.send_message(f"Role {role.name} edited.", ephemeral=True)
             else:
                 role_name = interaction.user.name + f"'s Role ({hex_code})"
-                role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}", position=reference_role.position + 1)
+                role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}")
+                await role.edit(position=reference_role.position + 1)
                 database.update_user_role(interaction.user.id, role.id)
                 await interaction.response.send_message(f"Role {role.name} assigned.", ephemeral=True)
         else:
             role_name = interaction.user.name + f"'s Role ({hex_code})"
-            role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}", position=reference_role.position + 1)
+            role = await interaction.guild.create_role(name=role_name, colour=discord.Colour(int(hex_code[1:], 16)), reason=f"{interaction.user.name} requested color change to {hex_code}")
+            await role.edit(position=reference_role.position + 1)
+
             query = database.ColorUser.create(user_id=interaction.user.id, role_id=role.id)
             query.save()
             database.update_user_role(interaction.user.id, role.id)
@@ -74,13 +78,17 @@ class RoleNameModal(Modal):
             else:
                 random_hex_code = discord.Color.random()
                 role_name = interaction.user.name + f"'s Role ({random_hex_code.value})"
-                role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}", position=reference_role.position + 1)
+                role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}")
+                await role.edit(position=reference_role.position + 1)
+
                 database.update_user_role(interaction.user.id, role.id)
                 await interaction.response.send_message(f"Role {role.name} assigned.", ephemeral=True)
         else:
             random_hex_code = discord.Color.random()
             role_name = interaction.user.name + f"'s Role ({random_hex_code.value})"
-            role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}", position=reference_role.position + 1)
+            role = await interaction.guild.create_role(name=role_name, colour=random_hex_code, reason=f"{interaction.user.name} requested name change to {role_name}")
+            await role.edit(position=reference_role.position + 1)
+            
             query = database.ColorUser.create(user_id=interaction.user.id, role_id=role.id)
             query.save()
             database.update_user_role(interaction.user.id, role.id)
@@ -102,13 +110,13 @@ class CustomizeView(View):
             SelectOption(label="Customize Role Color", value="customize_role_color", emoji="🎨"),
             SelectOption(label="Customize Role Name", value="customize_role_name", emoji="📝"),
             SelectOption(label="Get Roblox Role", value="get_roblox_role", emoji="🤖"),
-            SelectOption(label="Get Valorant Role", value="get_valorant_role", emoji="🔫")
+            SelectOption(label="Get Overwatch Role", value="get_overwatch_role", emoji="🔫")
         ]
         self.add_item(CustomizeDropdown(options=options))
 
 class CustomizeDropdown(Select):
     def __init__(self, options):
-        super().__init__(placeholder="Choose an action...", min_values=1, max_values=1, options=options)
+        super().__init__(placeholder="Choose an action...", min_values=1, max_values=1, options=options, custom_id="customize_dropdown")
 
     async def callback(self, interaction: discord.Interaction):
         if self.values[0] == "customize_role_color":
@@ -125,11 +133,11 @@ class CustomizeDropdown(Select):
             else:
                 await interaction.user.add_roles(roblox_role, reason="User requested to add Roblox role")
                 await interaction.response.send_message("Roblox role added!", ephemeral=True)
-        elif self.values[0] == "get_valorant_role":
+        elif self.values[0] == "get_overwatch_role":
             valorant_role = discord.utils.get(interaction.guild.roles, id=1249529840034512946)
             if valorant_role in interaction.user.roles:
-                await interaction.user.remove_roles(valorant_role, reason="User requested to remove Valorant role")
-                await interaction.response.send_message("Valorant role removed!", ephemeral=True)
+                await interaction.user.remove_roles(valorant_role, reason="User requested to remove Overwatch role")
+                await interaction.response.send_message("Overwatch role removed!", ephemeral=True)
             else:
-                await interaction.user.add_roles(valorant_role, reason="User requested to add Valorant role")
-                await interaction.response.send_message("Valorant role added!", ephemeral=True)
+                await interaction.user.add_roles(valorant_role, reason="User requested to add Overwatch role")
+                await interaction.response.send_message("Overwatch role added!", ephemeral=True)

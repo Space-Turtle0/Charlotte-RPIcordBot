@@ -1,16 +1,17 @@
 import discord
+from discord.components import Button
 from discord.ext import commands
 from discord.ui import View, Select
 
 # Define dorm and class year roles with emojis and descriptions
 DORM_ROLES = {
-    "Bray": (1260475859664633957, "🏠 Bray, good luck lol"),
-    "Nugent": (1260475861811859458, "🌟 Nugent, ngl i thought this was mcdonalds nuggets"),
-    "Warren": (1260475864165122071, "🛏️ Warren, coolest dorm name"),
-    "Nason": (1260475866652348446, "🔔 Nason, good luck x2"),
-    "Barton": (1260475869563060307, "🏀 Barton, congrats on a good dorm hall"),
-    "Barh": (1260475871978983465, "🍕 Barh, best dining hall"),
-    "Remove Roles": (0, "❌ Remove all housing roles that you have"),
+    "Bray": (1260475859664633957, "🏠 Bray, good luck lol", "NONE"),
+    "Nugent": (1260475861811859458, "🌟 Nugent, ngl i thought this was mcdonalds nuggets", "NONE"),
+    "Warren": (1260475864165122071, "🛏️ Warren, coolest dorm name", "NONE"),
+    "Nason": (1260475866652348446, "🔔 Nason, good luck x2", "NONE"),
+    "Barton": (1260475869563060307, "🏀 Barton, congrats on a good dorm hall", "NONE"),
+    "Barh": (1260475871978983465, "🍕 Barh, best dining hall", "NONE"),
+    "Remove Roles": (0, "❌ Remove all housing roles that you have", "NONE"),
 }
 
 CLASS_YEAR_ROLES = {
@@ -45,12 +46,27 @@ async def update_role(interaction, role_id, role_type):
         await interaction.user.add_roles(role, reason=f"{interaction.user.name} requested {role_type} role {role.name}")
         await interaction.response.send_message(f"Hall Role: `{role.name}` assigned.", ephemeral=True)
 
+
+async def get_dorm_server(interaction):
+    user_roles = interaction.user.roles
+
+    # Find the role in DORM_ROLES
+    for dorm, (dorm_role_id, _, server_link) in DORM_ROLES.items():
+        if any(user_role.id == dorm_role_id for user_role in user_roles):
+            if server_link == "NONE":
+                await interaction.response.send_message(f"# {dorm}'s Server\n\nThere appears to be no server linked to this dorm hall. *If you would like your server published here, please contact <@409152798609899530>.*", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"# {dorm}'s Server\n\n> Join: {server_link}", ephemeral=True)
+            return
+
+    await interaction.response.send_message("You do not have the specified dorm role.", ephemeral=True)
+
 # Views and dropdowns
 class DormRoleView(View):
     def __init__(self):
         super().__init__(timeout=None)  # Persistent view
 
-        dorm_options = [discord.SelectOption(label=dorm, value=str(role_id), description=desc) for dorm, (role_id, desc) in DORM_ROLES.items()]
+        dorm_options = [discord.SelectOption(label=dorm, value=str(role_id), description=desc) for dorm, (role_id, desc, server_code) in DORM_ROLES.items()]
         self.add_item(DormDropdown(placeholder="Select your dorm", options=dorm_options))
 
 class DormDropdown(Select):
@@ -91,3 +107,24 @@ class RoleBot(commands.Bot):
         self.add_view(ClassYearRoleView())
         print(f'Logged in as {self.user}')
 
+class DormServerButton(discord.ui.Button):
+    def __init__(self, bot):
+        super().__init__(custom_id="dorm_server_button", label="Get Dorm Server", emoji="🔑")
+        self.bot = bot
+
+    async def callback(self, interaction: discord.Interaction):
+        await get_dorm_server(interaction)
+
+class DormServerView(View):
+    def __init__(self, bot):
+        super().__init__(timeout=None)
+        self.add_item(DormServerButton(bot))
+
+
+class CombinedDormView(View):
+    def __init__(self, bot):
+        super().__init__(timeout=None)
+        dorm_options = [discord.SelectOption(label=dorm, value=str(role_id), description=desc) for
+                        dorm, (role_id, desc, server_code) in DORM_ROLES.items()]
+        self.add_item(DormDropdown(placeholder="Select your dorm", options=dorm_options))
+        self.add_item(DormServerButton(bot))

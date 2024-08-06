@@ -1,59 +1,19 @@
-import base64
+import datetime
 import os
-import pickle
 import random
 import time
-from email.mime.text import MIMEText
+
 
 import discord
 from discord.ui import Modal, TextInput, View, Button
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from core import database
-
-# If modifying these SCOPES, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-
-# Gmail API setup
-def get_gmail_service():
-    creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-            except:
-                raise Exception("Error refreshing token") # Sentry needs to pick this up.
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-    service = build('gmail', 'v1', credentials=creds)
-    return service
 
 def generate_verification_code():
     return str(random.randint(100000, 999999))
 
-def create_message(to, subject, message_text):
-    message = MIMEText(message_text)
-    message['to'] = to
-    message['subject'] = subject
-    raw = base64.urlsafe_b64encode(message.as_bytes())
-    return {'raw': raw.decode()}
-
-def send_message(service, user_id, message):
-    try:
-        message = (service.users().messages().send(userId=user_id, body=message).execute())
-        return message
-    except Exception as error:
-        print(f'An error occurred: {error}')
-        return None
 
 class EmailVerificationModal(Modal):
     email = TextInput(label="RPI Email", placeholder="Enter your @rpi.edu email", required=True, max_length=50)
@@ -97,14 +57,26 @@ class EmailVerificationModal(Modal):
         q = database.EmailVerification.create(discord_id=interaction.user.id, email=rpi_email, verification_code=verification_code, class_year=self.class_year.value)
         q.save()
 
+        message = Mail(
+            from_email='no-reply@charlotteverifies.site',
+            to_emails=rpi_email,
+            subject='Verification Email'
+        )
+        message.dynamic_template_data = {
+            'twilio_code': str(verification_code),
+            'discord_username': interaction.user.name,
+            'discord_id': interaction.user.id,
+            'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        message.template_id = "d-18c06f10e9164d0cb22a2c3d77cee2c6"
+
         try:
-            service = get_gmail_service()
+            sendgrid_client = SendGridAPIClient(os.getenv("SENDGRID"))
+            response = sendgrid_client.send(message)
         except:
-            await interaction.response.send_message("Looks like the Gmail API is down. Please try again later. (Contact <@409152798609899530> if this keeps happening.)", ephemeral=True)
+            await interaction.response.send_message("Looks like the SendGrid API is down. Please try again later. (Contact <@409152798609899530> if this keeps happening.)", ephemeral=True)
             return
-        message = create_message(rpi_email, f' RPIcord Verification Code: {verification_code}', f'Use the code {verification_code} to verify your email address for the RPI Class of 2028 Discord Server.\n\nIf you did not request this, please ignore this email.')
-        send_message(service, 'me', message)
-        await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n> **Use /verification verify_code to finalize verification!**', ephemeral=True)
+        await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n> **Use /verification verify_code in <#1161341529516949626> to finalize verification!**', ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong. Contact the bot admin (<@409152798609899530>) if this keeps happening.', ephemeral=True)

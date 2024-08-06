@@ -42,6 +42,12 @@ class MiscCMD(commands.Cog):
     def display_emoji(self) -> str:
         return Emoji.schoolsimplified
 
+    QC = app_commands.Group(
+        name="ask",
+        description="Commands for Charlotte's AI interface.",
+        guild_ids=[1216429016760717322, 1161339749487870062]
+    )
+
     @app_commands.command(name="ping", description="Pong!")
     @app_commands.guilds(1216429016760717322, 1161339749487870062)
     async def ping(self, interaction: discord.Interaction):
@@ -129,25 +135,117 @@ class MiscCMD(commands.Cog):
         # Remove the output file after playing
         os.remove('output.mp3')
 
-    @app_commands.command(name="ask", description="Ask a question")
-    @app_commands.guilds(1216429016760717322, 1161339749487870062)
-    async def ask(self, interaction: discord.Interaction, *, question: str, be_nice: bool = False):
-        if be_nice:
-            content = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and feel free to be nice when needed. Current date: {datetime.now()}"
-        else:
-            content = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and feel free to be mean when needed. Current date: {datetime.now()}"
+    @QC.command(name="me", description="Ask a question")
+    @app_commands.describe(question="Information is not guaranteed to be accurate. | be_nice defaulted to false")
+    @app_commands.describe(be_nice="If you want the AI to be nice or not. Defaulted to false/no.")
+    async def me(self, interaction: discord.Interaction, *, question: str, be_nice: bool = False):
+        database.db.connect(reuse_if_open=True)
+
+        messages = []
+
+        # Add global context if it exists
+        global_query = database.AIContext.select().where(database.AIContext.global_context == True)
+        if global_query.exists():
+            global_context = global_query.get().context
+            messages.append({"role": "system", "content": global_context})
+
+        # Add user-specific context if it exists
+        user_query = database.AIContext.select().where(database.AIContext.discord_id == interaction.user.id)
+        if user_query.exists():
+            user_context = user_query.get().context
+            messages.append({"role": "system", "content": "Specific Context for this user: " + user_context})
+
+        # Default context if none found
+        if not messages:
+            default_context = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and feel free to be nice when needed. Current date: {datetime.datetime.now()}"
+            messages.append({"role": "system", "content": default_context})
+
+        # Add the user question
+        messages.append({"role": "user", "content": question})
+
+        # Generate the response
         response = self.client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
-            messages=[
-                {"role": "system",
-                "content": content},
-                {"role": "user", "content": question}
-            ]
+            messages=messages
         )
+
         await interaction.response.send_message(response.choices[0].message.content)
+        database.db.close()
+
+    @QC.command(name="config", description="Configure the AI Context")
+    @app_commands.describe(context="The context you want to set for the AI.")
+    async def config(self, interaction: discord.Interaction, context: str, discord_user: discord.Member = None):
+        q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
+        if q.exists():
+            database.db.connect(reuse_if_open=True)
+            if discord_user is None:
+                query = database.AIContext.select().where(database.AIContext.global_context == True)
+                if query.exists():
+                    query.get().context = context
+                    query.get().save()
+                    await interaction.response.send_message("edited global context")
+                else:
+                    query = database.AIContext.create(context=context, global_context=True)
+                    query.save()
+                    await interaction.response.send_message("set global context")
+            else:
+                query = database.AIContext.select().where(database.AIContext.discord_id == discord_user.id)
+                if query.exists():
+                    query.get().context = context
+                    query.get().save()
+                    await interaction.response.send_message(f"edited context for {discord_user.mention}")
+                else:
+                    query = database.AIContext.create(discord_id=discord_user.id, context=context, global_context=False)
+                    query.save()
+                    await interaction.response.send_message(f"set context for {discord_user.mention}")
+            database.db.close()
+
+        else:
+            await interaction.response.send_message("who even are you lil bro")
+
+    @QC.command(name="get", description="Get the AI Context")
+    @app_commands.describe(discord_user="The user you want to get the context for.")
+    async def get(self, interaction: discord.Interaction, discord_user: discord.Member = None):
+        database.db.connect(reuse_if_open=True)
+        q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
+        if q.exists():
+            if discord_user is None:
+                query = database.AIContext.select().where(database.AIContext.global_context == True)
+                if query.exists():
+                    context = query.get().context
+                else:
+                    context = "No context set."
+            else:
+                query = database.AIContext.select().where(database.AIContext.discord_id == discord_user.id)
+                if query.exists():
+                    context = query.get().context
+                else:
+                    context = "No context set."
+            database.db.close()
+            await interaction.response.send_message(context)
+        else:
+            await interaction.response.send_message("who even are you lil bro")
+
+    @QC.command(name="delete", description="Delete the AI Context")
+    @app_commands.describe(discord_user="The user you want to delete the context for.")
+    async def delete(self, interaction: discord.Interaction, discord_user: discord.Member):
+        q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
+        if q.exists():
+            database.db.connect(reuse_if_open=True)
+            if discord_user is None:
+                await interaction.response.send_message("not permitted")
+
+            else:
+                query = database.AIContext.select().where(database.AIContext.discord_id == discord_user.id)
+                if query.exists():
+                    query.get().delete_instance()
+            database.db.close()
+        else:
+            await interaction.response.send_message("who even are you lil bro")
+
 
     @app_commands.command(name="impersonate", description="do something weird but not by you")
-    @app_commands.guilds(1216429016760717322)
+    @app_commands.guilds(1216429016760717322, 1161339749487870062)
     async def impersonate(self, interaction: discord.Interaction, person: discord.Member, message: str):
         q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
         if q.exists():

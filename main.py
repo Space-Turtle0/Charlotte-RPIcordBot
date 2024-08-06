@@ -27,7 +27,7 @@ from core.common import get_extensions
 from core.logging_module import get_log
 from core.rolecolors import CustomizeView
 from core.rpi.email_verification import EmailVerificationView
-from core.rpi.reaction_roles import DormRoleView, ClassYearRoleView
+from core.rpi.reaction_roles import DormRoleView, ClassYearRoleView, DormServerView, CombinedDormView
 from core.special_methods import (
     before_invoke_,
     initialize_database,
@@ -97,6 +97,8 @@ class Charlotte(commands.Bot):
         bot.add_view(DormRoleView())
         bot.add_view(ClassYearRoleView())
         bot.add_view(EmailVerificationView(bot))
+        bot.add_view(DormServerView(bot))
+        bot.add_view((CombinedDormView(bot)))
 
         with alive_bar(
             len(get_extensions()),

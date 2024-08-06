@@ -8,7 +8,8 @@ from core import database
 MAJOR_SHORT_NAMES = {
     "Architecture": "Arch",
     "Building Sciences": "BuildSci",
-    "Aeronautical Engineering": "Aero",
+    "Aeronautical Engineering": "AeroE",
+    "Aerospace": "SpaceE",
     "Biomedical Engineering": "BME",
     "Chemical Engineering": "ChemE",
     "Civil Engineering": "CivE",
@@ -48,7 +49,8 @@ MAJOR_SHORT_NAMES = {
     "Interdisciplinary Science": "IDSci",
     "Mathematics": "Math",
     "Physics": "Phys",
-    "Information Technology and Web Science": "ITWS"
+    "Information Technology and Web Science": "ITWS",
+    "Other": "Other"
 }
 
 BS_MAJORS = [
@@ -142,6 +144,9 @@ class EmailVerificationCog(commands.Cog):
                 else:
                     role = interaction.guild.get_role(self.upperclassman_role)
                     await interaction.user.add_roles(role, reason=f"{interaction.user.name} verified as a student")
+
+                if major == "Other":
+                    await interaction.followup.send("Looks like we don't have your major yet.\n> **Please ping an admin to manually add your major!**", ephemeral=True)
 
                 finalized: database.FinalizedEmailVerification = database.FinalizedEmailVerification.create(
                     discord_id=interaction.user.id, email=email, class_year=class_year)

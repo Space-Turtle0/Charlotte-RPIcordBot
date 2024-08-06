@@ -1,3 +1,9 @@
+"""
+NO LONGER USED
+
+SENDGRID IS NOW USED FOR EMAIL VERIFICATION
+"""
+
 import os
 import pickle
 from google.auth.transport.requests import Request

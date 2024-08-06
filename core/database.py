@@ -14,7 +14,6 @@ from peewee import (
     SqliteDatabase,
     TextField,
 )
-
 from core.logging_module import get_log
 
 load_dotenv()
@@ -316,7 +315,29 @@ class StarboardMessage(BaseModel):
     id = AutoField()
     original_message_id = IntegerField(unique=True)
     starboard_message_id = IntegerField()
-    star_count = IntegerField() 
+    star_count = IntegerField()
+
+class AIContext(BaseModel):
+    """
+    # AIContext:
+    AI Context for users.
+
+    `id`: AutoField()
+    Database Entry
+
+    `discord_id`: BigIntegerField()
+    Discord ID | Optional
+
+    `context`: TextField()
+    AI Context
+
+    `global_context`: BooleanField()
+    Global Context
+    """
+    id = AutoField()
+    discord_id = BigIntegerField(default=0)
+    context = TextField()
+    global_context = BooleanField()
 
 # Function to initialize the database
 def initialize_db():
@@ -373,7 +394,8 @@ tables = {
     "ClassSchedule": ClassSchedule,
     "EmailVerification": EmailVerification,
     "FinalizedEmailVerification": FinalizedEmailVerification,
-    "StarboardMessage": StarboardMessage
+    "StarboardMessage": StarboardMessage,
+    "AIContext": AIContext,
 }
 
 """
