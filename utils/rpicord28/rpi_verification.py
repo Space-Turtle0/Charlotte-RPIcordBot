@@ -98,6 +98,7 @@ class EmailVerificationCog(commands.Cog):
             await interaction.response.send_message("You are already verified.", ephemeral=True)
             return
 
+        first_name = first_name.capitalize()
         codes = []
         class_year = 0
         email = ""

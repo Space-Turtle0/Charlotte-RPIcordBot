@@ -76,8 +76,13 @@ class EmailVerificationModal(Modal):
         except:
             await interaction.response.send_message("Looks like the SendGrid API is down. Please try again later. (Contact <@409152798609899530> if this keeps happening.)", ephemeral=True)
             return
-        await interaction.response.send_message(f'Verification email sent to {rpi_email}. Please check your *(junk)* inbox and use the code to verify.\n\n> **Use /verification verify_code in <#1161341529516949626> to finalize verification!**', ephemeral=True)
-
+        await interaction.response.send_message(
+            f'Verification email sent to {rpi_email}. Please check your inbox *(and junk folder)* for the email.\n\n'
+            'If you don\'t see it and it\'s been over 2 minutes, visit [Microsoft Quarantine](https://security.microsoft.com/quarantine) '
+            'and sign in with your @rpi.edu account.\n\n'
+            '> **Use /verification verify_code in <#1161341529516949626> to finalize verification!**',
+            ephemeral=True
+        )
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong. Contact the bot admin (<@409152798609899530>) if this keeps happening.', ephemeral=True)
         print(error)

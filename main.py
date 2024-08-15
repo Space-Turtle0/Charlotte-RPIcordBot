@@ -35,6 +35,7 @@ from core.special_methods import (
     on_ready_,
     on_command_,
 )
+from core.rpi.modmail import TicketManageView, TicketButton
 
 load_dotenv()
 faulthandler.enable()
@@ -98,7 +99,9 @@ class Charlotte(commands.Bot):
         bot.add_view(ClassYearRoleView())
         bot.add_view(EmailVerificationView(bot))
         bot.add_view(DormServerView(bot))
-        bot.add_view((CombinedDormView(bot)))
+        bot.add_view(CombinedDormView(bot))
+        bot.add_view(TicketManageView(bot))
+        bot.add_view(TicketButton(bot))
 
         with alive_bar(
             len(get_extensions()),
@@ -127,6 +130,21 @@ class Charlotte(commands.Bot):
         if "<@191666744064999425>" in message.content and message.author != bot.user:
             gif_link = "https://tenor.com/view/are-you-serious-clark-clark-christmas-vacation-dinner-family-gif-5426034"
             await message.channel.send(gif_link)
+
+        if message.channel.id == 1161341529516949626 and message.author != bot.user:
+            help_content = """
+            ## Looks like you're having some trouble verifying your email.\n\nThe bot operates via slash commands, not normal text based commands.\n> Try clicking: </verification verify_code:1260484865598554174> to finish the verification process\n\n-# This is how it should look.\nhttps://cdn.discordapp.com/attachments/1161341529516949626/1271272306102112327/CleanShot_2024-08-08_at_21.02.122x.png?ex=66b764d8&is=66b61358&hm=a4f42c96f0b7c1a8daeb2dab86b014bc0dc7296ed4f9c59e0e390e05c86146e8&.
+            """
+            if message.content.isdigit() and len(message.content) == 6:
+                await message.channel.send(
+                    help_content
+                )
+            elif message.content.startswith("/verify") or message.content.startswith(
+                "/verification verify_code"
+            ) or "verify_code" in message.content or "verification" in message.content:
+                await message.channel.send(
+                    help_content
+                )
 
         await self.process_commands(message)
 

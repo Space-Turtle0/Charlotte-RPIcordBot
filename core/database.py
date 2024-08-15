@@ -339,6 +339,40 @@ class AIContext(BaseModel):
     context = TextField()
     global_context = BooleanField()
 
+
+class TicketInfo(BaseModel):
+    """
+    #TicketInfo
+
+    `id`: AutoField()
+    Database Entry
+
+    `channel_id`: BigIntegerField()
+    Channel ID of the Ticket.
+
+    `author_id`: BigIntegerField()
+    Author ID of the Ticket Owner.
+    """
+
+    id = AutoField()
+    channel_id = BigIntegerField()
+    author_id = BigIntegerField()
+
+
+class BaseTickerInfo(BaseModel):
+    """
+    #BaseTickerInfo
+
+    `id`: AutoField()
+    Database Entry
+
+    `counter`: BigIntegerField()
+    Counter for the total amount of channels.
+    """
+
+    id = AutoField()
+    counter = BigIntegerField()
+
 # Function to initialize the database
 def initialize_db():
     db.connect()
@@ -396,6 +430,8 @@ tables = {
     "FinalizedEmailVerification": FinalizedEmailVerification,
     "StarboardMessage": StarboardMessage,
     "AIContext": AIContext,
+    "TicketInfo": TicketInfo,
+    "BaseTickerInfo": BaseTickerInfo,
 }
 
 """
