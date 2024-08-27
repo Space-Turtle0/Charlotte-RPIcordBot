@@ -6,11 +6,11 @@ from discord.ui import View, Select
 # Define dorm and class year roles with emojis and descriptions
 DORM_ROLES = {
     "Bray": (1260475859664633957, "🏠 Bray, good luck lol", "NONE"),
-    "Nugent": (1260475861811859458, "🌟 Nugent, ngl i thought this was mcdonalds nuggets", "NONE"),
-    "Warren": (1260475864165122071, "🛏️ Warren, coolest dorm name", "NONE"),
-    "Nason": (1260475866652348446, "🔔 Nason, good luck x2", "NONE"),
-    "Barton": (1260475869563060307, "🏀 Barton, congrats on a good dorm hall", "NONE"),
-    "Barh": (1260475871978983465, "🍕 Barh, best dining hall", "NONE"),
+    "Nugent": (1260475861811859458, "🌟 Nugent, ngl i thought this was mcdonalds nuggets", "https://discord.gg/xRwcBmYa3e"),
+    "Warren": (1260475864165122071, "🛏️ Warren, coolest dorm name", "https://discord.gg/5Fdv49QT8F"),
+    "Nason": (1260475866652348446, "🔔 Nason, good luck x2", "https://discord.gg/38THUrQcZJ"),
+    "Barton": (1260475869563060307, "🏀 Barton, congrats on a good dorm hall", "https://discord.gg/AGwEGQZZwd"),
+    "Barh": (1260475871978983465, "🍕 Barh, best dining hall", "https://discord.gg/hBkGKX59Sn"),
     "Remove Roles": (0, "❌ Remove all housing roles that you have", "NONE"),
 }
 

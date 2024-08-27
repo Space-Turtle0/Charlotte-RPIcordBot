@@ -38,7 +38,7 @@ class CoreBotConfig(commands.Cog):
     PM = app_commands.Group(
         name="permit",
         description="Configure the bots permit settings.",
-        guild_ids=[guild]
+        guild_ids=[guild, 1161339749487870062]
     )
 
     @PM.command(description="Lists all permit levels and users.")

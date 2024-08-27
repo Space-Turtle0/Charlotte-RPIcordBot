@@ -6,6 +6,7 @@ import io
 import chat_exporter
 from chat_exporter import AttachmentToDiscordChannelHandler
 from core import database
+from core.logging_module import get_log
 
 
 class TicketManageView(discord.ui.View):
@@ -142,6 +143,12 @@ class TicketCreateButton(discord.ui.Button):
             author_id=author.id
         )
         ticket.save()
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        _log = get_log(__name__)
+
+        await interaction.response.send_message("Oops! something went wrong. looks like ur fucked lol. don't open more tickets cause i broke something", ephemeral=True)
+        _log.error(error)
 
 
 class TicketButton(discord.ui.View):

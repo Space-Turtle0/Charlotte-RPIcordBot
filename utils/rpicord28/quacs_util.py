@@ -10,7 +10,7 @@ from discord.ext import commands
 from pytz import timezone
 
 from core import database
-from core.rpi.course_data import CourseData
+from core.rpi.course_data import CourseData, BlockLocation
 from core.rpi.quacs_base import Prerequisite, Restriction
 
 # URLs to fetch the JSON files from GitHub
@@ -446,6 +446,101 @@ class RegistrationCog(commands.Cog):
         else:
             await interaction.response.send_message("No matching course found for the given subject and score.", ephemeral=True)
 
+    @QC.command(name='identify_blocks', description='Get what type of class each block is.')
+    @app_commands.describe(crn="The CRN of the class", view="Choose between desktop and mobile view", private="Whether to send the response privately")
+    async def identify_blocks(self, interaction: discord.Interaction, crn: int, view: Literal["desktop", "mobile"] = "desktop", private: bool = True):
+        await interaction.response.defer(thinking=True)
+
+        block_location = BlockLocation()
+        class_types = await block_location.find_class_type(str(crn))
+
+        if isinstance(class_types, list):
+            embed = discord.Embed(
+                title=f"{class_types[0][0]} ({class_types[0][1]})",
+                description=f"There are **{len(class_types)}** blocks for this class.",
+                color=0xde1f1f
+            )
+
+            schedule = {
+                'Monday': [],
+                'Tuesday': [],
+                'Wednesday': [],
+                'Thursday': [],
+                'Friday': [],
+            }
+
+            block_details = []
+
+            for block in class_types:
+                # one of them is mixed up but ill fix later
+                block_type = block[2]
+                block_days = block[6]
+                block_start = block[7]
+                block_end = block[8]
+                block_location = block[9]
+                block_teacher = block[10]
+
+                block_info = f"`{block_type}` on {block_days} from {block_start} to {block_end} at {block_location} with {block_teacher}"
+                block_details.append(block_info)
+
+                if 'M' in block_days:
+                    schedule['Monday'].append(block_type)
+                if 'T' in block_days:
+                    schedule['Tuesday'].append(block_type)
+                if 'W' in block_days:
+                    schedule['Wednesday'].append(block_type)
+                if 'R' in block_days:
+                    schedule['Thursday'].append(block_type)
+                if 'F' in block_days:
+                    schedule['Friday'].append(block_type)
+
+            if view == "desktop":
+                calendar = "```\n"
+                calendar += "| Monday    | Tuesday   | Wed       | Thursday  | Friday    |\n"
+                calendar += "-------------------------------------------------------------\n"
+
+                max_blocks = max(len(schedule[day]) for day in schedule)
+
+                for row in range(max_blocks):
+                    calendar += "|"
+                    for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']:
+                        if row < len(schedule[day]):
+                            calendar += f" {schedule[day][row]} ".ljust(10) + "|"
+                        else:
+                            calendar += " " * 10 + "|"
+                    calendar += "\n"
+
+                calendar += "```"
+
+            elif view == "mobile":
+                calendar = "```\n"
+                for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']:
+                    calendar += f"{day}:\n"
+                    if len(schedule[day]) > 0:
+                        for block in schedule[day]:
+                            calendar += f"  {block}\n"
+                    else:
+                        calendar += "  None\n"
+                    calendar += "\n"
+                calendar += "```"
+
+            embed.add_field(
+                name="Schedule",
+                value=calendar,
+                inline=False
+            )
+
+            embed.add_field(
+                name="Block Details",
+                value="\n".join(block_details),
+                inline=False
+            )
+
+            embed.set_footer(text="LEC: Lecture | LAB: Laboratory | TES: Test Block")
+            await interaction.followup.send(embed=embed, ephemeral=private)
+
+        else:
+            await interaction.followup.send("Unknown CRN", ephemeral=private)
 
 async def setup(bot):
     await bot.add_cog(RegistrationCog(bot))

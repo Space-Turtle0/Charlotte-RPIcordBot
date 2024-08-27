@@ -1,4 +1,6 @@
+import aiohttp
 import requests
+from bs4 import BeautifulSoup
 
 from core.rpi.quacs_base import Course, Prerequisite, CourseCatalog, Section, Restriction
 
@@ -118,3 +120,49 @@ class CourseData:
                         section_obj = Section(**section)
                         return course_obj, section_obj
         return None, None
+
+class BlockLocation:
+    def __init__(self):
+        self.block_url = "https://sis.rpi.edu/reg/zs202409.htm"
+
+    async def fetch_html(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.block_url) as response:
+                return await response.text()
+
+    async def find_class_type(self, crn):
+        html_content = await self.fetch_html()
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        rows = soup.find_all('tr', {'align': 'LEFT'})
+        all_rows = []
+
+        for row in rows:
+            columns = [col.text.strip() for col in row.find_all('td')]
+            all_rows.append(columns)
+
+        section_blocks = []
+        capturing = False
+
+        for columns in all_rows:
+            if len(columns) == 0:
+                continue
+
+            first_column_text = columns[0]
+
+            if first_column_text.startswith(crn):
+                capturing = True
+                section_blocks.append(columns)
+                continue
+
+            if capturing and first_column_text == "":
+                section_blocks.append(columns)
+
+            elif capturing and first_column_text != "":
+                break
+
+        if section_blocks:
+            return section_blocks
+        else:
+            return "CRN not found or no blocks associated."

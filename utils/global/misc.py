@@ -260,10 +260,12 @@ class MiscCMD(commands.Cog):
     @app_commands.command(name="say", description="do something weird but not by you but by bot")
     @app_commands.guilds(1216429016760717322, 1161339749487870062)
     async def say(self, interaction: discord.Interaction, message: str):
-        if interaction.user.id != 409152798609899530:
-            return await interaction.response.send_message("who even are you lil bro")
-        await interaction.response.send_message("Sent!", ephemeral=True)
-        await interaction.channel.send(message)
+        q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
+        if q.exists():
+            await interaction.response.send_message("Sent!", ephemeral=True)
+            await interaction.channel.send(message)
+        else:
+            await interaction.response.send_message("who even are you lil bro")
 
     @commands.command()
     async def connect(self, ctx, vc_id):

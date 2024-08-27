@@ -504,3 +504,35 @@ class TicTacToe(discord.ui.View):
             return self.Tie
 
         return None
+
+class NitroConfirmFake(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.value = None
+
+    @discord.ui.button(
+        label="Claim",
+        style=discord.ButtonStyle.green,
+        custom_id="persistent_view:nitrofake",
+    )
+    async def claim(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            await interaction.response.send_message(
+                "https://images-ext-2.discordapp.net/external/YTk-6Mfxbbr8KwIc-3Pyy5Z_06tfpcO65MflxYgbjA8/"
+                "%3Fcid%3D73b8f7b119cc9225923f70c7e25a1f8e8932c7ae8ef48fe7%26rid%3Dgiphy.mp4%26ct%3Dg/"
+                "https/media2.giphy.com/media/Ju7l5y9osyymQ/giphy.mp4",
+                ephemeral=True,
+            )
+        except discord.errors.InteractionResponded:
+            await interaction.followup.send(
+                "https://images-ext-2.discordapp.net/external/YTk-6Mfxbbr8KwIc-3Pyy5Z_06tfpcO65MflxYgbjA8/%3Fcid%3D73"
+                "b8f7b119cc9225923f70c7e25a1f8e8932c7ae8ef48fe7%26rid%3Dgiphy.mp4%26ct%3Dg"
+                "/https/media2.giphy.com/media/Ju7l5y9osyymQ/giphy.mp4",
+                ephemeral=True,
+            )
+        self.value = True
+
+
+"""embed = discord.Embed(title = "Nitro", description="Expires in 48 Hours", color=discord.Color.dark_grey())
+embed.set_thumbnail(url="https://i.imgur.com/w9aiD6F.png")
+msg = await ctx.send("A Wild Gift Appears!", embed=embed, view=NitroConfirmFake())"""
