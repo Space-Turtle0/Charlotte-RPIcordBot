@@ -85,7 +85,7 @@ class EmailVerificationCog(commands.Cog):
     VR = app_commands.Group(
         name="verification",
         description="Commands for verifying your student status.",
-        guild_ids=[1216429016760717322, 1161339749487870062]
+        guild_ids=[1216429016760717322, 1161339749487870062, 1319202133501022209]
     )
 
     @VR.command(name='verify_code', description="Step 2 of the verification process.")

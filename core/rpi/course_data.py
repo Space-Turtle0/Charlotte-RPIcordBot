@@ -4,9 +4,10 @@ from bs4 import BeautifulSoup
 
 from core.rpi.quacs_base import Course, Prerequisite, CourseCatalog, Section, Restriction
 
+SEMESTER_TIMESTAMP = "202509"
 
 class CourseData:
-    GITHUB_BASE_URL = 'https://raw.githubusercontent.com/quacs/quacs-data/master/semester_data/202409/'
+    GITHUB_BASE_URL = f'https://raw.githubusercontent.com/quacs/quacs-data/master/semester_data/{SEMESTER_TIMESTAMP}/'
 
     FILE_URLS = {
         'catalog': GITHUB_BASE_URL + 'catalog.json',
@@ -123,7 +124,7 @@ class CourseData:
 
 class BlockLocation:
     def __init__(self):
-        self.block_url = "https://sis.rpi.edu/reg/zs202409.htm"
+        self.block_url = f"https://sis.rpi.edu/reg/zs{SEMESTER_TIMESTAMP}.htm"
 
     async def fetch_html(self):
         async with aiohttp.ClientSession() as session:

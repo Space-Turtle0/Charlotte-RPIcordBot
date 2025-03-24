@@ -45,11 +45,11 @@ class MiscCMD(commands.Cog):
     QC = app_commands.Group(
         name="ask",
         description="Commands for Charlotte's AI interface.",
-        guild_ids=[1216429016760717322, 1161339749487870062]
+        guild_ids=[1216429016760717322, 1161339749487870062, 1319202133501022209]
     )
 
     @app_commands.command(name="ping", description="Pong!")
-    @app_commands.guilds(1216429016760717322, 1161339749487870062)
+    @app_commands.guilds(1216429016760717322, 1161339749487870062, 1319202133501022209)
     async def ping(self, interaction: discord.Interaction):
         database.db.connect(reuse_if_open=True)
 
@@ -85,7 +85,7 @@ class MiscCMD(commands.Cog):
 
     @app_commands.command(description="Play a game of TicTacToe with someone!")
     @app_commands.describe(user="The user you want to play with.")
-    @app_commands.guilds(1216429016760717322, 1161339749487870062)
+    @app_commands.guilds(1216429016760717322, 1161339749487870062, 1319202133501022209)
     async def tictactoe(self, interaction: discord.Interaction, user: discord.Member):
         if user is None:
             return await interaction.response.send_message(
@@ -245,7 +245,7 @@ class MiscCMD(commands.Cog):
 
 
     @app_commands.command(name="impersonate", description="do something weird but not by you")
-    @app_commands.guilds(1216429016760717322, 1161339749487870062)
+    @app_commands.guilds(1216429016760717322, 1161339749487870062, 1319202133501022209)
     async def impersonate(self, interaction: discord.Interaction, person: discord.Member, message: str):
         q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
         if q.exists():
@@ -258,7 +258,7 @@ class MiscCMD(commands.Cog):
             await interaction.response.send_message("who even are you lil bro")
 
     @app_commands.command(name="say", description="do something weird but not by you but by bot")
-    @app_commands.guilds(1216429016760717322, 1161339749487870062)
+    @app_commands.guilds(1216429016760717322, 1161339749487870062, 1319202133501022209)
     async def say(self, interaction: discord.Interaction, message: str):
         q = database.Administrators.select().where(database.Administrators.discordID == interaction.user.id)
         if q.exists():

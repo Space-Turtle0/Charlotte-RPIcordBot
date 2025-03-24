@@ -5,6 +5,7 @@ from typing import Literal
 
 import discord
 import requests
+from click import command
 from discord import app_commands
 from discord.ext import commands
 from pytz import timezone
@@ -14,7 +15,7 @@ from core.rpi.course_data import CourseData, BlockLocation
 from core.rpi.quacs_base import Prerequisite, Restriction
 
 # URLs to fetch the JSON files from GitHub
-GITHUB_BASE_URL = 'https://raw.githubusercontent.com/quacs/quacs-data/master/semester_data/202409/'
+GITHUB_BASE_URL = 'https://raw.githubusercontent.com/quacs/quacs-data/master/semester_data/202509/'
 
 FILE_URLS = {
     'catalog': GITHUB_BASE_URL + 'catalog.json',
@@ -103,13 +104,13 @@ class RegistrationCog(commands.Cog):
     QC = app_commands.Group(
         name="quacs",
         description="Commands for QuACS information.",
-        guild_ids=[1216429016760717322, 1161339749487870062]
+        guild_ids=[1216429016760717322, 1161339749487870062, 1319202133501022209]
     )
 
     CR = app_commands.Group(
         name="schedule",
         description="Commands for scheduling.",
-        guild_ids=[1216429016760717322, 1161339749487870062]
+        guild_ids=[1216429016760717322, 1161339749487870062, 1319202133501022209]
     )
 
     def split_into_chunks(self, sections, chunk_size):
@@ -496,8 +497,8 @@ class RegistrationCog(commands.Cog):
 
             if view == "desktop":
                 calendar = "```\n"
-                calendar += "| Monday    | Tuesday   | Wed       | Thursday  | Friday    |\n"
-                calendar += "-------------------------------------------------------------\n"
+                calendar += "| Monday   | Tuesday  | Wed      | Thursday | Friday   |\n"
+                calendar += "-------------------------------------------------------\n"
 
                 max_blocks = max(len(schedule[day]) for day in schedule)
 
@@ -541,6 +542,10 @@ class RegistrationCog(commands.Cog):
 
         else:
             await interaction.followup.send("Unknown CRN", ephemeral=private)
+
+"""    @app_commands.command(name="dining_halls", description="Get the current dining hall timings")
+    async def dining_halls(self, interaction: discord.Interaction):"""
+        
 
 async def setup(bot):
     await bot.add_cog(RegistrationCog(bot))
