@@ -127,6 +127,21 @@ class Charlotte(commands.Bot):
 
         :param message: discord.Message: The message to process.
         """
+        club_events_channel = int(os.getenv('CLUB_EVENTS_CHANNEL'))
+        stugov_events_channel = int(os.getenv('STUGOV_EVENTS_CHANNEL'))
+        faculty_events_channel = int(os.getenv('FACULTY_EVENTS_CHANNEL'))
+
+        club_events_ping = int(os.getenv('CLUB_EVENTS_PING'))
+        stugov_events_ping = int(os.getenv('STUGOV_EVENTS_PING'))
+        faculty_events_ping = int(os.getenv('FACULTY_EVENTS_PING'))
+
+        if message.channel.id == club_events_channel:
+            await message.channel.send(f'<@&{club_events_ping}>')
+        elif message.channel.id == stugov_events_channel:
+            await message.channel.send(f'<@&{stugov_events_ping}>')
+        elif message.channel.id == faculty_events_channel:
+            await message.channel.send(f'<@&{faculty_events_ping}>')
+
         if "<@191666744064999425>" in message.content and message.author != bot.user:
             gif_link = "https://tenor.com/view/are-you-serious-clark-clark-christmas-vacation-dinner-family-gif-5426034"
             await message.channel.send(gif_link)

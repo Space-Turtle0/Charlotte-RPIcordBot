@@ -157,7 +157,10 @@ class MiscCMD(commands.Cog):
 
         # Default context if none found
         if not messages:
-            default_context = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and feel free to be nice when needed. Current date: {datetime.datetime.now()}"
+            if be_nice:
+                default_context = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and feel free to be nice when needed. Current date: {datetime.datetime.now()}"
+            else:
+                default_context = f"You are Charlotte, you currently attend Rensselaer Polytechnic Institute as an architecture major. Answer as concisely as possible. Have a personality and be rude and very mean when needed. Current date: {datetime.datetime.now()}"
             messages.append({"role": "system", "content": default_context})
 
         # Add the user question
